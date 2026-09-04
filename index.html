@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Bufoid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme:light;
+    --bg:#0c1a10;
+    --panel:#132b1a;
+    --panel2:#1c4025;
+    --gold:#c9a227;
+    --gold-soft:#e8cf7a;
+    --crimson:#c1446b;
+    --ink:#e8ece6;
+    --ink-dim:#9db3a1;
+    --black-suit:#151826;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh;
+    background:linear-gradient(to bottom, #050a06 0%, #050a06 80%, var(--panel2) 100%);
+    font-family:'Inter',system-ui,sans-serif;
+    color:var(--ink);
+    display:flex; justify-content:center;
+    padding:24px 16px 60px;
+  }
+  .app{width:100%; max-width:520px;}
+  .brand-logo{
+    width:min(130px, 34%);
+    margin:14px auto 34px;
+    display:block;
+  }
+  .brand-logo svg{
+    display:block; width:100%; height:auto;
+    filter:drop-shadow(0 0 18px rgba(201,162,39,0.25));
+  }
+  .panel{
+    background:linear-gradient(160deg, var(--panel), var(--panel2));
+    border:1px solid rgba(201,162,39,0.25);
+    border-radius:14px; padding:22px;
+    margin-bottom:16px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.35);
+  }
+  .menu-list{display:flex; flex-direction:column; align-items:center; margin-top:10px;}
+  .menu-item{
+    background:none; border:none; outline:none; appearance:none;
+    width:100%; padding:15px 0;
+    font-family:'Inter'; font-weight:700; font-size:1.05rem; letter-spacing:0.03em;
+    cursor:pointer; transition:opacity .2s ease, transform .15s ease;
+    color:var(--ink-dim);
+    text-shadow:0 -1px 0 rgba(0,0,0,0.65), 0 1px 0 rgba(215,230,205,0.3);
+  }
+  .menu-item:hover{opacity:0.82; color:var(--ink);}
+  .menu-item:active{transform:translateY(1px);}
+  .menu-divider{
+    width:62%; max-width:180px; height:1px;
+    background:rgba(0,0,0,0.5);
+    box-shadow:0 1px 0 rgba(205,220,195,0.14);
+  }
+  .menu-item-primary{
+    color:var(--gold-soft);
+    text-shadow:
+      0 0 8px rgba(201,162,39,0.7),
+      0 0 20px rgba(201,162,39,0.45),
+      0 0 40px rgba(201,162,39,0.25);
+    animation:menuGlow 2.8s ease-in-out infinite;
+  }
+  @keyframes menuGlow{
+    0%,100%{ text-shadow:0 0 7px rgba(201,162,39,0.6), 0 0 16px rgba(201,162,39,0.38), 0 0 32px rgba(201,162,39,0.2); }
+    50%{ text-shadow:0 0 12px rgba(201,162,39,0.95), 0 0 28px rgba(201,162,39,0.62), 0 0 50px rgba(201,162,39,0.32); }
+  }
+  .role-card-row{display:flex; justify-content:center; gap:14px; margin:16px 0;}
+  .role-card{
+    position:relative;
+    width:77px; height:110px; border-radius:10px; background:#f4f1ea;
+    display:flex; flex-direction:column; justify-content:center; align-items:center;
+    cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.4);
+    border:2px solid transparent; transition:all .15s ease;
+  }
+  .role-card:hover{transform:translateY(-2px);}
+  .role-card.selected{border-color:var(--gold); box-shadow:0 0 14px rgba(201,162,39,0.6), 0 4px 10px rgba(0,0,0,0.4); transform:translateY(-4px);}
+  .role-card.facedown{background:linear-gradient(160deg,#2a1a3a,#151020);}
+  .role-card .role-icon{font-size:2.28rem; display:flex; align-items:center; justify-content:center;}
+  .role-card .role-icon svg{width:43px; height:43px; display:block;}
+  .role-card .role-icon.facedown-mark{color:var(--gold-soft);}
+  .role-card-index-tl{
+    position:absolute; top:5px; left:5px;
+    writing-mode:vertical-rl; text-orientation:upright;
+    font-size:0.5rem; line-height:1; letter-spacing:1.5px;
+    font-weight:600; color:#000; opacity:0.82; pointer-events:none;
+  }
+  .role-card-index-br{
+    position:absolute; bottom:5px; right:5px;
+    writing-mode:vertical-rl; text-orientation:sideways;
+    font-size:0.5rem; line-height:1;
+    font-weight:600; color:#000; opacity:0.82; pointer-events:none;
+  }
+  button.big-choice{
+    background:var(--panel2); border:1px solid rgba(201,162,39,0.3);
+    border-radius:12px; padding:18px; color:var(--ink);
+    font-family:'Inter'; font-size:1rem; font-weight:600; text-align:left;
+    cursor:pointer; transition:all .15s ease;
+  }
+  button.big-choice:hover{border-color:var(--gold); background:#254a2e; transform:translateY(-1px);}
+  button.big-choice small{display:block; color:var(--ink-dim); font-weight:400; margin-top:4px; font-size:0.8rem;}
+  .choice-title{font-size:1.02rem; font-weight:700; color:var(--ink);}
+  .choice-versus{font-size:0.85rem; font-weight:600; color:var(--gold-soft); margin-top:2px;}
+  .footer{text-align:center; color:var(--ink-dim); font-size:0.7rem; opacity:0.55; margin-top:32px; line-height:1.6;}
+  .info-p{font-size:0.87rem; line-height:1.55; color:var(--ink); margin-bottom:10px;}
+  .info-warn{font-size:0.87rem; line-height:1.55; color:var(--crimson); margin-bottom:10px; border-left:2px solid var(--crimson); padding-left:12px;}
+  .step-num{display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; background:var(--gold); color:#1a1200; font-family:'Inter'; font-weight:600; font-size:0.9rem; margin-right:8px; flex-shrink:0;}
+  .step-title{display:flex; align-items:center; font-family:'Inter'; font-weight:600; font-size:1.15rem; color:var(--gold-soft); margin-bottom:12px;}
+  .branch-box{border:1px solid rgba(201,162,39,0.2); border-radius:10px; padding:14px; margin-top:10px; background:rgba(0,0,0,0.15);}
+  .branch-title{font-weight:700; color:var(--gold-soft); font-size:0.85rem; margin-bottom:6px;}
+  .arrow-down{text-align:center; color:var(--ink-dim); font-size:1.2rem; margin:2px 0;}
+  .cost-tag{display:inline-block; background:rgba(193,68,107,0.18); color:var(--crimson); border:1px solid rgba(193,68,107,0.4); border-radius:6px; padding:2px 8px; font-size:0.75rem; font-weight:600;}
+  .reward-tag{display:inline-block; background:rgba(201,162,39,0.18); color:var(--gold-soft); border:1px solid rgba(201,162,39,0.4); border-radius:6px; padding:2px 8px; font-size:0.75rem; font-weight:600;}
+  .info-section-title{font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--gold); font-weight:600; margin:18px 0 8px;}
+  .contact-label-fixed{display:inline-block; width:6.5em;}
+  button.action{
+    background:var(--gold); color:#1a1200; border:none; border-radius:10px;
+    padding:13px 20px; font-weight:600; font-size:0.95rem; cursor:pointer;
+    width:100%; margin-top:6px; transition:transform .1s ease;
+    font-family:'Inter';
+  }
+  button.action:hover{transform:translateY(-1px); background:var(--gold-soft);}
+  button.action:disabled{opacity:0.35; cursor:not-allowed; transform:none;}
+  button.ghost{
+    background:transparent; border:1px solid rgba(201,162,39,0.3); color:var(--ink-dim);
+    border-radius:10px; padding:10px 16px; font-size:0.85rem; cursor:pointer; width:100%;
+    margin-top:8px; font-family:'Inter';
+  }
+  button.ghost:hover{border-color:var(--ink-dim); color:var(--ink);}
+  .label{font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--gold); font-weight:600; margin-bottom:6px;}
+  .row{display:flex; gap:10px;}
+  .row > *{flex:1;}
+  .cardface{
+    width:64px; height:92px; border-radius:8px; background:#f4f1ea;
+    display:flex; flex-direction:column; justify-content:space-between; align-items:center;
+    padding:6px; font-family:'Inter'; font-weight:600;
+    box-shadow:0 4px 10px rgba(0,0,0,0.4);
+  }
+  .cardface.reveal{ animation:flipin .35s ease; }
+  .cardface.joker{background:linear-gradient(160deg,#2a1a3a,#151020); color:var(--gold-soft); border:1px solid var(--gold);}
+  @keyframes flipin{
+    from{transform:rotateY(90deg); opacity:0;}
+    to{transform:rotateY(0deg); opacity:1;}
+  }
+  .cardface .rank{font-size:0.95rem; align-self:flex-start;}
+  .cardface .suit-big{font-size:1.6rem;}
+  .cardface.small{width:42px; height:60px; padding:4px; border-radius:6px;}
+  .cardface.small .rank{font-size:0.62rem;}
+  .cardface.small .suit-big{font-size:1.05rem;}
+  .extra-card-wrap{display:inline-flex; flex-direction:column; align-items:center; gap:3px;}
+  .extra-card-label{font-size:0.58rem; text-transform:uppercase; letter-spacing:0.03em; color:var(--ink-dim); text-align:center; max-width:52px; line-height:1.1;}
+  .card-row{display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end; margin:10px 0;}
+  .score-board{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
+  .score-block{text-align:center; flex:1;}
+  .score-num{font-family:'Inter'; font-size:1.8rem; color:var(--gold-soft); font-weight:600;}
+  .score-name{font-size:0.72rem; color:var(--ink-dim); text-transform:uppercase; letter-spacing:0.08em; margin-top:2px;}
+  .score-name.mp-left{text-align:left;}
+  .vs{color:var(--ink-dim); font-family:'Inter'; font-weight:600; padding:0 10px;}
+  .log{max-height:150px; overflow-y:auto; font-size:0.82rem; color:var(--ink-dim); border-top:1px solid rgba(120,130,110,0.18); padding-top:10px; margin-top:10px;}
+  .role-desc-name{text-align:center; color:var(--gold-soft); font-weight:600; font-size:0.95rem; margin-bottom:10px;}
+  .role-desc-scroll{max-height:88px; overflow-y:auto; font-size:0.82rem; line-height:1.45; color:var(--ink-dim); text-align:left; padding:8px 6px 2px; border-top:1px solid rgba(120,130,110,0.18);}
+  .log-round{font-weight:600; color:var(--gold-soft); text-transform:uppercase; letter-spacing:0.05em; font-size:0.72rem; margin-top:10px; margin-bottom:2px;}
+  .log-round:first-child{margin-top:0;}
+  .log div{padding:3px 0; border-bottom:1px dashed rgba(120,130,110,0.15);}
+  .banner{
+    text-align:center; padding:10px; border-radius:8px; margin-bottom:14px;
+    background:rgba(201,162,39,0.12); border:1px solid rgba(201,162,39,0.3);
+    font-size:0.88rem; color:var(--gold-soft);
+  }
+  .result-title{font-family:'Inter'; font-weight:600; font-size:1.5rem; text-align:center; color:var(--gold-soft); margin-bottom:6px;}
+  .result-sub{text-align:center; color:var(--ink-dim); font-size:0.85rem; margin-bottom:18px;}
+  .hidden{display:none !important;}
+  .point-row{display:flex; justify-content:center; gap:6px; margin:8px 0;}
+  .point-star{width:30px; height:36px; border-radius:5px; background:var(--panel2); border:1px solid rgba(201,162,39,0.3); display:flex; align-items:center; justify-content:center; font-size:1.1rem;}
+  .point-star.claimed{background:var(--gold); color:#1a1200;}
+  .pool-tracker{text-align:center; color:var(--gold-soft); font-size:0.85rem; margin-bottom:10px; letter-spacing:0.03em;}
+  .pass-screen{text-align:center; padding:50px 20px;}
+  .pass-screen .icon{font-size:3rem; margin-bottom:14px;}
+  .hp-board{display:flex; flex-direction:column; gap:12px; margin-bottom:16px;}
+  .hp-wrap .hp-label{display:flex; justify-content:space-between; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-dim); margin-bottom:5px;}
+  .hp-wrap .hp-label b{color:var(--ink); letter-spacing:0.04em;}
+  .hp-bar-bg{background:rgba(0,0,0,0.4); border-radius:7px; height:12px; overflow:hidden; border:1px solid rgba(120,130,110,0.25);}
+  .hp-bar-fill{height:100%; border-radius:7px; transition:width .35s ease;}
+  .hp-bar-fill.guard{background:linear-gradient(90deg,#8a94a3,#d6dde6);}
+  .hp-bar-fill.assassin{background:linear-gradient(90deg,#8a1f3d,#c1446b);}
+  .hp-bar-fill.sorcerer{background:linear-gradient(90deg,#5b21b6,#a78bfa);}
+  .shield-banner{
+    text-align:center; padding:9px; border-radius:8px; margin-bottom:14px;
+    background:rgba(120,130,110,0.12); border:1px solid rgba(120,130,110,0.3);
+    font-size:0.85rem; color:var(--ink);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="brand-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 145.59 75.1"><defs><style>.a6c30868-2135-4a2f-9df7-b59a91eb0e09{fill:#fff;}</style></defs><title>BAsset 6ok6</title><g id="0614e796-9ec4-41d8-8c5d-7b5845543156" data-name="Layer 2"><g id="3cae3372-4c42-436e-b2a0-dd4fef55e809" data-name="Layer 1"><polygon class="a6c30868-2135-4a2f-9df7-b59a91eb0e09" points="93.8 20.15 101.44 9.66 94.44 0.01 86.81 10.51 72.84 15.04 58.87 10.5 51.24 0 44.23 9.69 51.88 20.21 65.19 24.5 72.89 34.97 80.47 24.49 93.8 20.15"/><polygon class="a6c30868-2135-4a2f-9df7-b59a91eb0e09" points="42.99 11.39 38.51 17.57 27.77 20.99 38.47 24.55 52.05 34.45 58.49 43.33 58.49 32.68 42.99 11.39"/><polygon class="a6c30868-2135-4a2f-9df7-b59a91eb0e09" points="117.9 20.96 107.17 17.53 102.68 11.36 87.18 32.64 87.18 43.3 93.84 34.19 107.47 24.38 117.9 20.96"/><path class="a6c30868-2135-4a2f-9df7-b59a91eb0e09" d="M21.4,73.7a8.42,8.42,0,0,1-5,1.4H0V52.29l6.14,6.14V69.38H17.08Z"/><path class="a6c30868-2135-4a2f-9df7-b59a91eb0e09" d="M23.92,68.4A6.8,6.8,0,0,1,23,72l-5.5-5.49a.64.64,0,0,0-.1-.13,1.81,1.81,0,0,0-1.34-.47H8.17v-4.7h7.54A1.73,1.73,0,0,0,17,60.82a1.63,1.63,0,0,0,.44-1.23A1.57,1.57,0,0,0,17,58.38,1.78,1.78,0,0,0,15.71,58H8.94L3.26,52.29H16.49a9.49,9.49,0,0,1,3.14.46A5.63,5.63,0,0,1,21.77,54,5,5,0,0,1,23,55.92a7.36,7.36,0,0,1,.38,2.37,6.44,6.44,0,0,1-.66,3,3.67,3.67,0,0,1-1.9,1.73A4.17,4.17,0,0,1,23,64.85,6.36,6.36,0,0,1,23.92,68.4Z"/><path class="a6c30868-2135-4a2f-9df7-b59a91eb0e09" d="M46.38,64.81A4.25,4.25,0,0,1,45.15,68,4.3,4.3,0,0,1,42,69.2H37.19A4.3,4.3,0,0,1,34.06,68a4.24,4.24,0,0,1-1.23-3.19V52.29H26.66v13a10,10,0,0,0,.77,4,9,9,0,0,0,2.18,3.11,10,10,0,0,0,3.3,2,11.67,11.67,0,0,0,4.17.72h5.05a11.72,11.72,0,0,0,4.16-.72,10,10,0,0,0,3.32-2,9,9,0,0,0,2.18-3.11,10,10,0,0,0,.77-4v-13H46.38Z"/><polygon class="a6c30868-2135-4a2f-9df7-b59a91eb0e09" points="56.2 75.09 62.34 75.09 62.34 58.15 77.47 58.15 77.47 52.29 56.2 52.29 56.2 75.09"/><polygon class="a6c30868-2135-4a2f-9df7-b59a91eb0e09" points="64.38 66.39 77.25 66.39 77.25 64.74 77.25 62.43 77.25 61.23 64.38 61.23 64.38 66.39"/><path class="a6c30868-2135-4a2f-9df7-b59a91eb0e09" d="M86.48,61.45a5.33,5.33,0,0,1,1.16-1.75,5.12,5.12,0,0,1,1.75-1.14,6,6,0,0,1,2.21-.4h4.14a6,6,0,0,1,2.21.4,5,5,0,0,1,2.9,2.89,5.55,5.55,0,0,1,.28,1h6.17a10.94,10.94,0,0,0-3.36-7,11.14,11.14,0,0,0-3.81-2.33,13.67,13.67,0,0,0-4.81-.82H92a13.77,13.77,0,0,0-4.84.82,11.13,11.13,0,0,0-3.81,2.33,10.94,10.94,0,0,0-3.36,7h6.17A5.4,5.4,0,0,1,86.48,61.45Z"/><path class="a6c30868-2135-4a2f-9df7-b59a91eb0e09" d="M100.85,65.94a4.93,4.93,0,0,1-1.14,1.74A5.24,5.24,0,0,1,98,68.8a5.93,5.93,0,0,1-2.21.4H91.61a6,6,0,0,1-2.25-.4,5.24,5.24,0,0,1-1.75-1.12,4.92,4.92,0,0,1-1.14-1.74,5.59,5.59,0,0,1-.32-1.2H80a11.2,11.2,0,0,0,.86,3.62A10.64,10.64,0,0,0,83.38,72a11.27,11.27,0,0,0,3.81,2.32,13.75,13.75,0,0,0,4.84.82h3.3a13.65,13.65,0,0,0,4.81-.82A11.27,11.27,0,0,0,103.94,72a10.66,10.66,0,0,0,2.51-3.6,11.22,11.22,0,0,0,.86-3.62h-6.14A5.63,5.63,0,0,1,100.85,65.94Z"/><rect class="a6c30868-2135-4a2f-9df7-b59a91eb0e09" x="110.48" y="52.29" width="6.14" height="22.81"/><path class="a6c30868-2135-4a2f-9df7-b59a91eb0e09" d="M139.41,64.74a5.6,5.6,0,0,1-.32,1.2A4.93,4.93,0,0,1,138,67.67a5.29,5.29,0,0,1-1.74,1.12,5.8,5.8,0,0,1-2.19.4h-7.4V64.74h-6.14V75.09H133.6a13.65,13.65,0,0,0,4.81-.82A11.28,11.28,0,0,0,142.22,72a10.66,10.66,0,0,0,2.51-3.6,11.22,11.22,0,0,0,.87-3.62Z"/><path class="a6c30868-2135-4a2f-9df7-b59a91eb0e09" d="M126.62,58.15H134a5.82,5.82,0,0,1,2.19.4,5.08,5.08,0,0,1,2.88,2.89,5.56,5.56,0,0,1,.28,1h6.2a10.95,10.95,0,0,0-3.36-7,11.14,11.14,0,0,0-3.81-2.33,13.66,13.66,0,0,0-4.81-.82H120.48V62.43h6.14Z"/></g></g></svg></div>
+  <div id="root"></div>
+  <div class="footer">BUFOID © 2026 Salis Padli<br>All rights reserved</div>
+</div>
+
+<script>
+const SUITS = {S:{sym:'♠',color:'black'}, C:{sym:'♣',color:'black'}, H:{sym:'♥',color:'red'}, D:{sym:'♦',color:'red'}};
+const SUIT_KEYS = ['S','C','H','D'];
+const RANK_LABEL = r => r===1?'A':r===11?'J':r===12?'Q':r===13?'K':String(r);
+
+function freshDeck(includeJoker){
+  const d = [];
+  for(const s of SUIT_KEYS) for(let r=1;r<=13;r++) d.push({suit:s, rank:r});
+  if(includeJoker) d.push({suit:'JOKER', rank:null});
+  for(let i=d.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [d[i],d[j]]=[d[j],d[i]]; }
+  return d;
+}
+function cardHTML(card, reveal){
+  const revClass = reveal ? ' reveal' : '';
+  if(card.suit==='JOKER') return `<div class="cardface joker${revClass}"><div class="rank">✦</div><div class="suit-big">🃏</div><div class="rank">FATE</div></div>`;
+  const info = SUITS[card.suit];
+  const col = info.color==='red' ? '#b8395f' : '#151826';
+  return `<div class="cardface${revClass}" style="color:${col}"><div class="rank">${RANK_LABEL(card.rank)}</div><div class="suit-big">${info.sym}</div><div class="rank" style="align-self:flex-end">${RANK_LABEL(card.rank)}</div></div>`;
+}
+function vExtraCardHTML(card, label){
+  if(!card) return '';
+  const face = cardHTML(card, false).replace('class="cardface', 'class="cardface small');
+  return `<div class="extra-card-wrap"><div class="extra-card-label">${label}</div>${face}</div>`;
+}
+function pairingExists(cards){
+  const suits = cards.map(c=>c.suit), ranks = cards.map(c=>c.rank);
+  return new Set(suits).size < suits.length || new Set(ranks).size < ranks.length;
+}
+
+const root = document.getElementById('root');
+function render(html){ root.innerHTML = html; }
+
+// ---------------- MODE SELECT ----------------
+function showModeSelect(){
+  render(`
+    <div class="panel">
+      <div class="menu-list">
+        <button class="menu-item menu-item-primary" onclick="startVersus()">Play</button>
+        <div class="menu-divider"></div>
+        <button class="menu-item" onclick="showAbout()">About</button>
+        <div class="menu-divider"></div>
+        <button class="menu-item" onclick="showContact()">Contact</button>
+      </div>
+    </div>
+  `);
+}
+
+// ---------------- ABOUT ----------------
+function showExplainer(){
+  render(`
+    <div class="panel">
+      <div class="result-title" style="margin-bottom:4px;">How Solo Mode Works</div>
+      <div class="info-p">In Single Player, one person plays both roles at once — <b>Guard</b> and <b>Assassin</b> — round after round, drawing from the same standard 52-card deck, no jokers. Each round, Guard draws first, then Assassin draws. Whoever ends up with more points when the game stops wins that session.</div>
+      <div class="info-p">Below is a full walkthrough of one round, followed by the branch points that can happen inside it, and the rule that decides when the game stops.</div>
+    </div>
+
+    <div class="panel">
+      <div class="step-title"><span class="step-num">1</span>The Guard's Turn</div>
+      <div class="label">Guard draws one card</div>
+      <div class="card-row">
+        <div class="cardface" style="color:#b8395f"><div class="rank">Q</div><div class="suit-big">♥</div><div class="rank" style="align-self:flex-end">Q</div></div>
+      </div>
+      <div class="info-p">Any suit except <b>♠ Spades</b> is a win — 1 point. A non-Spade <b>Ace</b> is worth 2 points instead. Spades score 0. Here, the Guard drew the Queen of Hearts: <b>1 point</b>.</div>
+      <div class="info-p">Whatever suit Guard's card is — win or not — becomes the <b>target suit</b> the Assassin has to chase this round. In this example, that target suit is <b>♥ Hearts</b>.</div>
+    </div>
+
+    <div class="panel">
+      <div class="step-title"><span class="step-num">2</span>The Assassin's Turn</div>
+      <div class="label">Assassin draws three cards, one at a time</div>
+      <div class="card-row">
+        <div class="cardface" style="color:#b8395f"><div class="rank">7</div><div class="suit-big">♥</div><div class="rank" style="align-self:flex-end">7</div></div>
+        <div class="cardface" style="color:#151826"><div class="rank">7</div><div class="suit-big">♣</div><div class="rank" style="align-self:flex-end">7</div></div>
+        <div class="cardface" style="color:#b8395f"><div class="rank">4</div><div class="suit-big">♦</div><div class="rank" style="align-self:flex-end">4</div></div>
+      </div>
+      <div class="info-p">Each card matching the target suit (♥) is worth 1 point. Here, only the 7♥ matches — that's <b>1 match</b>, so far worth 1 point on its own.</div>
+      <div class="info-p">If two or more of the three cards had matched, the round would resolve immediately with that many points (2 or 3) — no further draws needed. But with exactly one match, there's one more thing to check first: <b>pairing</b>.</div>
+    </div>
+
+    <div class="panel">
+      <div class="step-title"><span class="step-num">3</span>What Counts as a Pairing</div>
+      <div class="info-p">A pairing means <b>any two of the three cards share a suit, or share a rank</b> — even if one of those two cards is the winning card itself.</div>
+      <div class="info-p">In the example above: 7♥ and 7♣ share the same <b>rank</b> (both 7s). That's a pairing, even though their suits are different.</div>
+      <div class="info-p">Whether a pairing exists — combined with how many matches were found — decides what happens next:</div>
+    </div>
+
+    <div class="panel">
+      <div class="step-title"><span class="step-num">4</span>Two Ways a Round Can Continue</div>
+      <div class="branch-box">
+        <div class="branch-title">0 matches + a pairing → Mandatory Bonus Draw</div>
+        <div class="info-p">If the three cards score nothing at all, but a pairing exists among them, one more card must be drawn — no choice involved.</div>
+        <div class="card-row">
+          <div class="cardface" style="color:#151826"><div class="rank">3</div><div class="suit-big">♠</div><div class="rank" style="align-self:flex-end">3</div></div>
+          <div class="cardface" style="color:#151826"><div class="rank">3</div><div class="suit-big">♣</div><div class="rank" style="align-self:flex-end">3</div></div>
+          <div class="cardface" style="color:#b8395f"><div class="rank">9</div><div class="suit-big">♦</div><div class="rank" style="align-self:flex-end">9</div></div>
+        </div>
+        <div class="info-p" style="margin-top:6px;">0 matches to ♥, but the two 3s pair up. Draw one more card: matching ♥ turns this into <b>1 point</b>; anything else stays at <b>0</b>.</div>
+      </div>
+      <div class="branch-box">
+        <div class="branch-title">1 match + a pairing → Predict</div>
+        <div class="info-p">This is the situation from Step 2 and 3 above (7♥, 7♣, 4♦). With exactly 1 match already banked and a pairing present, the Assassin faces a real choice — covered next.</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="step-title"><span class="step-num">5</span>Predict — Spend the Point You Have</div>
+      <div class="info-p">A bonus draw is required either way. Before it happens, the Assassin chooses:</div>
+      <div class="branch-box">
+        <div class="branch-title">Predict <span class="cost-tag">spend the banked point</span></div>
+        <div class="info-p">Bet that the next card will be a <b>face card</b> — Jack, Queen, or King.</div>
+        <div class="card-row">
+          <div class="cardface" style="color:#151826"><div class="rank">K</div><div class="suit-big">♣</div><div class="rank" style="align-self:flex-end">K</div></div>
+          <span class="reward-tag">Correct → 3 points total</span>
+        </div>
+        <div class="card-row">
+          <div class="cardface" style="color:#b8395f"><div class="rank">6</div><div class="suit-big">♦</div><div class="rank" style="align-self:flex-end">6</div></div>
+          <span class="cost-tag">Wrong → 0 points, gone for good</span>
+        </div>
+      </div>
+      <div class="arrow-down">or</div>
+      <div class="branch-box">
+        <div class="branch-title">Continue <span class="reward-tag" style="background:rgba(120,130,110,0.15); color:var(--ink-dim); border-color:rgba(120,130,110,0.35);">no risk</span></div>
+        <div class="info-p">Draw the bonus card normally instead — no bet placed.</div>
+        <div class="card-row">
+          <div class="cardface" style="color:#b8395f"><div class="rank">2</div><div class="suit-big">♥</div><div class="rank" style="align-self:flex-end">2</div></div>
+          <span class="reward-tag">Matches ♥ → 2 points</span>
+        </div>
+        <div class="info-p" style="margin-top:4px;">Anything that doesn't match the target suit simply stays at the 1 point already banked.</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="step-title"><span class="step-num">6</span>When the Game Ends</div>
+      <div class="info-p">A standard 52-card deck is used — no jokers. Whenever an <b>Ace</b> is drawn, anywhere in a round — as Guard's card, as one of Assassin's three, or on a bonus draw — that round becomes the <b>last one played</b>.</div>
+      <div class="card-row">
+        <div class="cardface" style="color:#151826"><div class="rank">A</div><div class="suit-big">♣</div><div class="rank" style="align-self:flex-end">A</div></div>
+      </div>
+      <div class="banner">🂡 An Ace has been drawn — this is the final round.</div>
+      <div class="info-p">The Ace still scores exactly as it normally would — 2 points for Guard if it's a non-Spade Ace, or an ordinary card for Assassin. The only extra effect is that the game stops once this round resolves. The ending is deliberately unpredictable, and unrelated to how well either side has played so far.</div>
+    </div>
+
+    <div class="panel">
+      <div class="step-title"><span class="step-num">7</span>Deciding the Winner</div>
+      <div class="info-p">Whichever role — Guard or Assassin — has the <b>higher total</b> when the game ends wins that session. If both totals are equal, it's a tie.</div>
+      <div class="info-p" style="color:var(--ink-dim);">Guard tends to be the steadier of the two — smaller swings, a reliable floor. Assassin has the higher ceiling, but also the real chance of scoring nothing at all. Which one comes out ahead is exactly what each session is testing.</div>
+      <button class="action" onclick="showModeSelect()" style="margin-top:8px;">← Back to menu</button>
+    </div>
+  `);
+}
+function showAbout(){
+  render(`
+    <div class="panel">
+      <div class="result-title" style="margin-bottom:14px;">About Bufoid</div>
+
+      <div class="info-section-title">What this game is</div>
+      <div class="info-p">Bufoid is a non-transitive card game — the same principle as rock-paper-scissors, played out through card draws instead of a single throw. Its three roles form a closed loop: <b>Guard beats Assassin</b>, <b>Assassin beats Sorcerer</b>, and <b>Sorcerer beats Guard</b>. No role is strongest on its own — each is only the right or wrong pick relative to who you're facing.</div>
+      <div class="info-p">The whole system runs on a single standard 52-card deck — no jokers, no special equipment. Every mechanic is designed to be playable with real physical cards, not just on a screen.</div>
+
+      <div class="info-section-title">A note on gambling</div>
+      <div class="info-warn">Bufoid is a game of chance and strategy made for personal enjoyment, casual play, and the study of probability and decision-making. It is <b>not designed, licensed, or intended for gambling, wagering real money or anything of monetary value, or any activity regulated as gambling in any jurisdiction.</b> No feature of this game should be adapted to facilitate betting, staking, or payouts of real-world value.</div>
+      <div class="info-warn">This game and its rules, mechanics, and presentation are the copyrighted work of its creator. The creator reserves the right to take action against any use of this game, its name, or its mechanics in connection with gambling, betting platforms, or similar activities.</div>
+
+      <div class="info-p" style="color:var(--ink-dim); margin-top:16px;">For more information, or to discuss collaboration, see Contact.</div>
+
+      <button class="action" onclick="showModeSelect()" style="margin-top:8px;">← Back to menu</button>
+    </div>
+  `);
+}
+
+// ---------------- CONTACT ----------------
+function showContact(){
+  render(`
+    <div class="panel">
+      <div class="result-title" style="margin-bottom:14px;">Contact</div>
+      <div class="info-p">Questions, feedback, or interested in collaborating on Bufoid? Reach out through the channels below.</div>
+
+      <div class="info-section-title">Get in touch</div>
+      <div class="info-p"><span class="contact-label-fixed">Instagram</span>: @salispadli</div>
+      <div class="info-p"><span class="contact-label-fixed">WhatsApp</span>: +62 898-1618-141</div>
+      <div class="info-p"><span class="contact-label-fixed">Email</span>: salispadli@gmail.com</div>
+
+      <div class="info-section-title">Support the project</div>
+      <div class="info-p"><a href="http://lynk.id/salispadli/s/z2x0omwpl4r5/" target="_blank" rel="noopener" style="color:var(--ink); text-decoration:underline;">http://lynk.id/salispadli/s/z2x0omwpl4r5/</a></div>
+
+      <button class="action" onclick="showModeSelect()" style="margin-top:8px;">← Back to menu</button>
+    </div>
+  `);
+}
+
+// ================= SOLO MODE =================
+let solo;
+function startVersus(){
+  v = { p1Role:null, p2Role:null, p1Pick:null, p2Pick:null, p2FaceUp:null, p2FaceDown:null };
+  vRoleSelectP1();
+}
+function vRoleDesc(role){
+  if(role==='guard') return {icon:'🛡️', svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 105.57 105.57"><defs><style>.d13fef3d1-f05f-42ed-8424-5dd3316e9bef{fill:#58595b;}.df83aa7b8-7abe-4809-8510-ecba3abba272{fill:none;}</style></defs><g><g><polygon class="d13fef3d1-f05f-42ed-8424-5dd3316e9bef" points="38.79 24.14 30.14 39.12 38.79 39.12 44.13 48.38 33.44 48.38 24.79 63.36 38.79 87.61 66.78 87.61 80.78 63.36 72.13 48.38 61.44 48.38 66.78 39.12 75.43 39.12 66.78 24.14 58.13 39.12 47.44 39.12 38.79 24.14"/><polygon class="d13fef3d1-f05f-42ed-8424-5dd3316e9bef" points="78.64 42.66 75.34 48.38 81.94 59.82 85.25 54.1 78.64 42.66"/><polygon class="d13fef3d1-f05f-42ed-8424-5dd3316e9bef" points="26.93 42.66 20.32 54.1 23.63 59.82 30.23 48.38 26.93 42.66"/><polygon class="d13fef3d1-f05f-42ed-8424-5dd3316e9bef" points="11.58 51.92 32.18 87.61 14.88 87.61 6.23 72.63 11.58 63.37 8.27 57.65 11.58 51.92"/><polygon class="d13fef3d1-f05f-42ed-8424-5dd3316e9bef" points="73.39 87.61 90.69 87.61 99.34 72.63 93.99 63.37 97.3 57.65 93.99 51.92 73.39 87.61"/><rect class="df83aa7b8-7abe-4809-8510-ecba3abba272" width="105.57" height="105.57"/></g></g></svg>', name:'Guard', kana:'ワサカ', color:'#58595b', desc:"Heavily armored with incredible physical durability. Guard can block incoming attacks with his shield and consistently deal damage to the opponent. However, these advantages don't really work as effectively against magical abilities."};
+  if(role==='assassin') return {icon:'🗡️', svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 105.57 105.57"><defs><style>.d79a5534c-73c4-4fa5-bb07-8766f86b344a{fill:#ed2224;}.de2dbf0ba-e748-4eb7-8c3a-4a29b0382a88{fill:none;}</style></defs><g><g><path class="d79a5534c-73c4-4fa5-bb07-8766f86b344a" d="M6.07,7.41,52.79,88.34,99.52,7.41C103.44,39,78.29,65.21,51.74,64.66,25.84,64.11,2.16,38.2,6.07,7.41Z"/><path class="d79a5534c-73c4-4fa5-bb07-8766f86b344a" d="M34.94,67.25,52.79,98.16,70.64,67.25c1.5,12.08-8.11,22.08-18.25,21.87C42.49,88.91,33.45,79,34.94,67.25Z"/><path class="d79a5534c-73c4-4fa5-bb07-8766f86b344a" d="M81.66,85.59l-28.88-50-28.88,50C21.48,66,37,49.87,53.43,50.21,69.43,50.55,84.07,66.56,81.66,85.59Z"/><rect class="de2dbf0ba-e748-4eb7-8c3a-4a29b0382a88" width="105.57" height="105.57"/></g></g></svg>', name:'Assassin', kana:'コダテ', color:'#ed2224', desc:"Trained in quick and high-stake combat situations. Assassin possesses otherworldly agility and can land multiple attacks before the opponent can react. Unless you are armored, you have little to no chance."};
+  return {icon:'📖', svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 105.57 105.57"><defs><style>.db0913650-4a0d-43d8-bcdc-2e4b9e87b35b{fill:#9e1f63;}.d09295f1b-b342-454f-8352-9d470547f1f8{fill:none;}</style></defs><g><g><polygon class="db0913650-4a0d-43d8-bcdc-2e4b9e87b35b" points="71.65 60.84 54.65 66.35 64.82 80.25 82.32 74.56 92.31 60.8 71.65 60.84"/><polygon class="db0913650-4a0d-43d8-bcdc-2e4b9e87b35b" points="81.85 44.18 81.84 27.7 72.6 40.41 72.61 58.53 92.31 58.49 81.85 44.18"/><polygon class="db0913650-4a0d-43d8-bcdc-2e4b9e87b35b" points="40.78 80.31 50.92 66.36 33.92 60.83 13.25 60.88 23.25 74.62 40.78 80.31"/><polygon class="db0913650-4a0d-43d8-bcdc-2e4b9e87b35b" points="32.95 58.53 32.95 40.41 23.7 27.68 23.7 44.14 13.26 58.58 32.95 58.53"/><polygon class="db0913650-4a0d-43d8-bcdc-2e4b9e87b35b" points="62.93 81.66 52.78 67.71 42.64 81.66 52.78 95.62 62.93 81.66"/><polygon class="db0913650-4a0d-43d8-bcdc-2e4b9e87b35b" points="52.78 51.65 62.93 37.69 52.78 23.74 42.64 37.69 52.78 51.65"/><rect class="d09295f1b-b342-454f-8352-9d470547f1f8" width="105.57" height="105.57"/></g></g></svg>', name:'Sorcerer', kana:'アンタラ', color:'#9e1f63', desc:"Unexplainable by science. Sorcerer can manifest attacks from nothing, bypassing armors and shields. This strange power is unstoppable when successfully launched. The only chance to survive or win is by being faster than the incantation."};
+}
+function vRoleCard(role, selected, onclick){
+  const d = vRoleDesc(role);
+  return `<div class="role-card${selected?' selected':''}" onclick="${onclick}">
+    <div class="role-card-index-tl">${d.kana}</div>
+    <div class="role-icon">${d.svg}</div>
+    <div class="role-card-index-br">${d.name}</div>
+  </div>`;
+}
+function vRoleCardFacedown(selected, onclick){
+  return `<div class="role-card facedown${selected?' selected':''}" onclick="${onclick}"><div class="role-icon facedown-mark">❔</div></div>`;
+}
+function vConfirmButton(enabled, onclick){
+  return enabled
+    ? `<button class="action" onclick="${onclick}">Confirm Selection</button>`
+    : `<button class="action" disabled style="opacity:0.4; cursor:not-allowed;">Confirm Selection</button>`;
+}
+function vRoleSelectP1(){
+  const pick = v.p1Pick;
+  const d = pick ? vRoleDesc(pick) : null;
+  render(`
+    <div class="panel">
+      <div class="result-title" style="margin-bottom:28px;">Player 1</div>
+      <div class="role-card-row">
+        ${vRoleCard('guard', pick==='guard', "vPickP1Role('guard')")}
+        ${vRoleCard('assassin', pick==='assassin', "vPickP1Role('assassin')")}
+        ${vRoleCard('sorcerer', pick==='sorcerer', "vPickP1Role('sorcerer')")}
+      </div>
+      <div style="min-height:130px; margin-bottom:14px;">
+        ${d ? `
+          <div class="role-desc-name">${d.name}</div>
+          <div class="role-desc-scroll">${d.desc}</div>
+        ` : `
+          <div style="min-height:130px; display:flex; align-items:center; justify-content:center; text-align:center; color:var(--ink-dim); font-size:0.85rem;">Select any role to continue. Keep your decision a secret.</div>
+        `}
+      </div>
+      ${vConfirmButton(!!pick, 'vConfirmP1Role()')}
+    </div>
+    <button class="ghost" onclick="showModeSelect()">← Back to menu</button>
+  `);
+}
+function vPickP1Role(role){
+  v.p1Pick = role;
+  vRoleSelectP1();
+}
+function vConfirmP1Role(){
+  v.p1Role = v.p1Pick;
+  vPassScreen();
+}
+function vPassScreen(){
+  render(`
+    <div class="panel pass-screen">
+      <div class="icon">🔒</div>
+      <div style="margin-bottom:18px; color:var(--ink-dim)">Player 1's role is locked in.<br>Pass the device to Player 2.</div>
+      <button class="action" onclick="vRoleSelectP2()">I'm Player 2 — choose my role</button>
+    </div>
+  `);
+}
+function vRoleSelectP2(){
+  if(!v.p2FaceUp){
+    const remaining = ['guard','assassin','sorcerer'].filter(r=>r!==v.p1Role);
+    v.p2FaceUp = remaining[Math.random() < 0.5 ? 0 : 1];
+    v.p2FaceDown = remaining.find(r=>r!==v.p2FaceUp);
+  }
+  const pick = v.p2Pick;
+  let bodyHTML;
+  if(pick === v.p2FaceUp){
+    const d = vRoleDesc(v.p2FaceUp);
+    bodyHTML = `<div class="role-desc-name">${d.name}</div><div class="role-desc-scroll">${d.desc}</div>`;
+  } else if(pick === v.p2FaceDown){
+    bodyHTML = `<div style="min-height:130px; display:flex; align-items:center; justify-content:center; text-align:center; color:var(--ink-dim); font-size:0.85rem;">This is the other role Player 1 didn't choose. You won't know which one until you confirm.</div>`;
+  } else {
+    bodyHTML = `<div style="min-height:130px; display:flex; align-items:center; justify-content:center; text-align:center; color:var(--ink-dim); font-size:0.85rem;">You can select one of these two roles and one of them is randomly revealed. Analyze or trust your instinct to make the best decision.</div>`;
+  }
+  render(`
+    <div class="panel">
+      <div class="result-title" style="margin-bottom:28px;">Player 2</div>
+      <div class="role-card-row">
+        ${vRoleCard(v.p2FaceUp, pick===v.p2FaceUp, `vPickP2Role('${v.p2FaceUp}')`)}
+        ${vRoleCardFacedown(pick===v.p2FaceDown, `vPickP2Role('${v.p2FaceDown}')`)}
+      </div>
+      <div style="min-height:130px; margin-bottom:14px;">
+        ${bodyHTML}
+      </div>
+      ${vConfirmButton(!!pick, 'vConfirmP2Role()')}
+    </div>
+  `);
+}
+function vPickP2Role(role){
+  v.p2Pick = role;
+  vRoleSelectP2();
+}
+function vConfirmP2Role(){
+  v.p2Role = v.p2Pick;
+  vResolveMatchup();
+}
+function vResolveMatchup(){
+  const roles = new Set([v.p1Role, v.p2Role]);
+  if(roles.has('guard') && roles.has('assassin')) v.matchup = 'GA';
+  else if(roles.has('guard') && roles.has('sorcerer')) v.matchup = 'GS';
+  else v.matchup = 'AS';
+
+  v.deck = freshDeck(false);
+  v.idx = 0;
+  v.roundNum = 0;
+  v.log = [];
+  v.over = false;
+
+  const playerOf = role => v.p1Role===role ? 1 : 2;
+  if(v.matchup === 'GA'){
+    v.guardPlayer = playerOf('guard');
+    v.assassinPlayer = playerOf('assassin');
+    v.guardHP = 7; v.assassinHP = 5;
+    v.guardMaxHP = 7; v.assassinMaxHP = 5;
+    v.poison = null; // {suit, rank, createdRound} or null
+  } else if(v.matchup === 'GS'){
+    v.guardPlayer = playerOf('guard');
+    v.sorcererPlayer = playerOf('sorcerer');
+    v.guardHP = 7; v.sorcererHP = 5;
+    v.guardMaxHP = 7; v.sorcererMaxHP = 5;
+  } else {
+    v.assassinPlayer = playerOf('assassin');
+    v.sorcererPlayer = playerOf('sorcerer');
+    v.assassinHP = 5; v.sorcererHP = 5;
+    v.assassinMaxHP = 5; v.sorcererMaxHP = 5;
+    v.poison = null;
+  }
+  vShowOrder();
+}
+function vShowOrder(){
+  let title, desc, hpNote;
+  if(v.matchup === 'GA'){
+    title = 'Guard vs Assassin';
+    desc = `Player ${v.guardPlayer} is the Guard.<br>Player ${v.assassinPlayer} is the Assassin.<br><br>Guard moves first (1 card vs 3).`;
+    hpNote = `Guard starts at 7 HP, Assassin at 5 HP.`;
+  } else if(v.matchup === 'GS'){
+    title = 'Guard vs Sorcerer';
+    desc = `Player ${v.guardPlayer} is the Guard.<br>Player ${v.sorcererPlayer} is the Sorcerer.<br><br>Guard moves first (1 card vs 2).`;
+    hpNote = `Guard starts at 7 HP, Sorcerer at 5 HP.`;
+  } else {
+    title = 'Assassin vs Sorcerer';
+    desc = `Player ${v.assassinPlayer} is the Assassin.<br>Player ${v.sorcererPlayer} is the Sorcerer.<br><br>Sorcerer moves first (2 cards vs 3).`;
+    hpNote = `Both start at 5 HP.`;
+  }
+  render(`
+    <div class="panel">
+      <div class="banner">${title}</div>
+      <div style="text-align:left; margin:14px 0; color:var(--ink-dim)">${desc}<br><br>${hpNote} First to 0 loses — even mid-round.</div>
+      <button class="action" onclick="vNextRound()">Begin</button>
+    </div>
+  `);
+}
+function vDrawRaw(){
+  if(v.idx >= v.deck.length) return null;
+  return v.deck[v.idx++];
+}
+function vFinishNoCards(){
+  v.over = true;
+  renderVersus();
+}
+function vLogPush(text){
+  v.log.unshift({round: v.roundNum, text});
+}
+function vLogHTML(){
+  let html = '';
+  let lastRound = null;
+  for(const entry of v.log){
+    if(entry.round !== lastRound){
+      html += `<div class="log-round">Round ${entry.round}</div>`;
+      lastRound = entry.round;
+    }
+    html += `<div>${entry.text}</div>`;
+  }
+  return `<div class="log">${html || '<div style="opacity:0.6">No rounds completed yet.</div>'}</div>`;
+}
+function vRoundBanner(){
+  return `<div style="text-align:center; color:var(--ink-dim); font-size:0.78rem; margin-bottom:8px; letter-spacing:0.05em;">Round ${v.roundNum}</div>`;
+}
+function vHPRow(role, player, hp){
+  const d = vRoleDesc(role);
+  const cls = role; // 'guard' | 'assassin' | 'sorcerer' each map to their own CSS class
+  const maxHP = v[role+'MaxHP'] || 5;
+  const pct = Math.max(0,hp)/maxHP*100;
+  return `
+    <div class="hp-wrap">
+      <div class="hp-label"><b>${d.icon} ${d.name} (P${player})</b><span>${Math.max(0,hp)}/${maxHP}</span></div>
+      <div class="hp-bar-bg"><div class="hp-bar-fill ${cls}" style="width:${pct}%"></div></div>
+    </div>`;
+}
+function vNextRound(){
+  v.roundNum += 1;
+  if(v.matchup === 'GA') vNextRoundGA();
+  else if(v.matchup === 'GS') vNextRoundGS();
+  else vNextRoundAS();
+}
+function renderVersus(){
+  if(v.matchup === 'GA') renderVersusGA();
+  else if(v.matchup === 'GS') renderVersusGS();
+  else renderVersusAS();
+}
+function vPlayAgain(){ startVersus(); }
+
+// ============ GUARD vs ASSASSIN ============
+function vNextRoundGA(){
+  // expire poison once its 1-round window has passed
+  if(v.poison !== null && v.roundNum - v.poison.createdRound > 1) v.poison = null;
+  v.round = {
+    phase:'guard', gcard:null, shield:false, blockChoice:null, blockUsed:false, dmgToAssassin:0,
+    acards:[], suit_matches:0, rank_matches:0, raw_hits_3:0, pairing:false, dmg_first3:0,
+    bonusCard:null, bonusCriterion:null, bonusHit:0,
+    gSuits:[], gRanks:[], poisonActive:false, poisonHeld:false, heldDamage:0
+  };
+  renderVersus();
+}
+function vGA_CheckDeath(){
+  if(v.guardHP <= 0 || v.assassinHP <= 0){ v.over = true; renderVersus(); return true; }
+  return false;
+}
+// current target suits/ranks for this round: Guard's own card, plus poison's suit/rank
+// while poison is still active (unused) — recomputed live so a used-up poison drops out immediately
+function vGA_TargetSuits(r){
+  const suits = r.gSuits.slice();
+  if(r.poisonActive && v.poison) suits.push(v.poison.suit);
+  return suits;
+}
+function vGA_TargetRanks(r){
+  const ranks = r.gRanks.slice();
+  if(r.poisonActive && v.poison) ranks.push(v.poison.rank);
+  return ranks;
+}
+function vDrawGuard(){
+  const c = vDrawRaw();
+  if(!c){ vFinishNoCards(); return; }
+  const r = v.round;
+  r.gcard = c;
+  r.gSuits = [c.suit];
+  r.gRanks = [c.rank];
+  r.poisonActive = v.poison !== null && (v.roundNum - v.poison.createdRound === 1);
+
+  if(c.suit === 'S'){
+    // poison rule: if poison is Spades and this card's rank is lower, the shield fails outright — no choice offered
+    if(r.poisonActive && v.poison.suit === 'S' && c.rank < v.poison.rank){
+      vLogPush(`Guard (P${v.guardPlayer}) drew ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → poison from ${SUITS[v.poison.suit].sym}${RANK_LABEL(v.poison.rank)} overpowers it (${c.rank} < ${v.poison.rank}), shield fails to rise.`);
+      r.shield = false;
+      r.phase = 'assassin';
+      renderVersus();
+      return;
+    }
+    r.shield = true;
+    r.phase = 'shield-choice';
+    renderVersus();
+  } else {
+    r.dmgToAssassin = c.rank === 1 ? 2 : 1;
+    // poison rule: the hit doesn't register unless this card's rank overcomes the poison's rank —
+    // instead of being lost, it's held and lands after Assassin's turn if Assassin lands no hits
+    if(r.poisonActive && c.rank < v.poison.rank){
+      vLogPush(`Guard (P${v.guardPlayer}) drew ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → poison from ${SUITS[v.poison.suit].sym}${RANK_LABEL(v.poison.rank)} holds it (${c.rank} < ${v.poison.rank}); the hit is held, pending Assassin's turn.`);
+      r.heldDamage = r.dmgToAssassin;
+      r.dmgToAssassin = 0;
+      r.poisonHeld = true;
+      r.phase = 'assassin';
+      renderVersus();
+      return;
+    }
+    v.assassinHP = Math.max(0, v.assassinHP - r.dmgToAssassin);
+    const poisonNote = r.poisonActive ? ` (overcame poison from ${SUITS[v.poison.suit].sym}${RANK_LABEL(v.poison.rank)})` : '';
+    vLogPush(`Guard (P${v.guardPlayer}) drew ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → Assassin takes ${r.dmgToAssassin}.${poisonNote} HP — Guard ${v.guardHP}, Assassin ${v.assassinHP}`);
+    if(vGA_CheckDeath()) return;
+    r.phase = 'assassin';
+    renderVersus();
+  }
+}
+function vSetBlock(choice){
+  v.round.blockChoice = choice;
+  vLogPush(`Guard (P${v.guardPlayer}) shield will block the next ${choice.toUpperCase()} hit.`);
+  v.round.phase = 'assassin';
+  renderVersus();
+}
+function vDrawAssassinCard(){
+  const c = vDrawRaw();
+  if(!c){ vFinishNoCards(); return; }
+  const r = v.round;
+  const isFirstCard = r.acards.length === 0;
+  r.acards.push(c);
+  const targetSuits = vGA_TargetSuits(r);
+  const targetRanks = vGA_TargetRanks(r);
+  const isSuit = targetSuits.includes(c.suit);
+  const isRank = targetRanks.includes(c.rank);
+  if(isSuit || isRank){
+    const type = isSuit ? 'suit' : 'rank';
+    const viaPoison = r.poisonActive && v.poison && (
+      (type === 'suit' && c.suit === v.poison.suit && !r.gSuits.includes(c.suit)) ||
+      (type === 'rank' && c.rank === v.poison.rank && !r.gRanks.includes(c.rank))
+    );
+    if(r.poisonActive && v.poison !== null && (c.suit === v.poison.suit || c.rank === v.poison.rank)){
+      vLogPush(`Poison from ${SUITS[v.poison.suit].sym}${RANK_LABEL(v.poison.rank)} is used up and removed from the target range.`);
+      v.poison = null;
+      r.poisonActive = false;
+    }
+    if(type === 'suit') r.suit_matches += 1; else r.rank_matches += 1;
+    const poisonNote = viaPoison ? ' (poison-borne)' : '';
+    if(r.shield && !r.blockUsed && r.blockChoice === type){
+      r.blockUsed = true;
+      vLogPush(`Assassin (P${v.assassinPlayer}) drew ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → ${type} match${poisonNote}, but the shield blocks it. HP — Guard ${v.guardHP}, Assassin ${v.assassinHP}`);
+    } else {
+      v.guardHP = Math.max(0, v.guardHP - 1);
+      r.dmg_first3 += 1;
+      vLogPush(`Assassin (P${v.assassinPlayer}) drew ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → ${type} match${poisonNote}! Guard takes 1. HP — Guard ${v.guardHP}, Assassin ${v.assassinHP}`);
+      if(vGA_CheckDeath()) return;
+    }
+  } else {
+    vLogPush(`Assassin (P${v.assassinPlayer}) drew ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → no match.`);
+  }
+
+  // poison that held back a hit this round dissolves right after Assassin's first card, regardless of outcome
+  if(isFirstCard && r.poisonHeld && r.poisonActive){
+    vLogPush(`Poison from ${SUITS[v.poison.suit].sym}${RANK_LABEL(v.poison.rank)} dissolves after holding back a hit — removed from the target range.`);
+    v.poison = null;
+    r.poisonActive = false;
+  }
+
+  if(r.acards.length === 3){
+    r.raw_hits_3 = r.suit_matches + r.rank_matches;
+    // Assassin's turn is over — the poison-held damage registers regardless of what else landed this turn
+    if(r.heldDamage > 0){
+      v.assassinHP = Math.max(0, v.assassinHP - r.heldDamage);
+      vLogPush(`Assassin's turn ends — the poison-held damage lands! Assassin takes ${r.heldDamage}. HP — Guard ${v.guardHP}, Assassin ${v.assassinHP}`);
+      r.heldDamage = 0;
+      if(vGA_CheckDeath()) return;
+    }
+    r.pairing = pairingExists(r.acards);
+    if((r.raw_hits_3 === 0 || r.raw_hits_3 === 1) && r.pairing){
+      r.phase = 'bonus-choice';
+    } else {
+      r.phase = 'round-done';
+    }
+  }
+  renderVersus();
+}
+function vSetBonusCriterion(choice){
+  v.round.bonusCriterion = choice;
+  vLogPush(`Assassin (P${v.assassinPlayer}) bonus criterion: ${choice.toUpperCase()}.`);
+  v.round.phase = 'bonus-draw';
+  renderVersus();
+}
+function vDrawBonus(){
+  const c = vDrawRaw();
+  if(!c){ vFinishNoCards(); return; }
+  const r = v.round;
+  r.bonusCard = c;
+  const targetSuits = vGA_TargetSuits(r);
+  const targetRanks = vGA_TargetRanks(r);
+  const hit = r.bonusCriterion === 'suit' ? targetSuits.includes(c.suit) : targetRanks.includes(c.rank);
+  const critLabel = r.bonusCriterion === 'suit' ? targetSuits.map(s=>SUITS[s].sym).join('/') : targetRanks.map(RANK_LABEL).join('/');
+  if(hit){
+    r.bonusHit = 1;
+    v.guardHP = Math.max(0, v.guardHP - 1);
+    vLogPush(`Assassin (P${v.assassinPlayer}) bonus ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} (${r.bonusCriterion} = ${critLabel}) → matched, unblockable! Guard takes 1. HP — Guard ${v.guardHP}, Assassin ${v.assassinHP}`);
+    if(vGA_CheckDeath()) return;
+  } else {
+    vLogPush(`Assassin (P${v.assassinPlayer}) bonus ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} (${r.bonusCriterion} = ${critLabel}) → missed.`);
+  }
+  v.poison = {suit: c.suit, rank: c.rank, createdRound: v.roundNum};
+  vLogPush(`Assassin's bonus card ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} poisons Guard's next round.`);
+  r.phase = 'round-done';
+  renderVersus();
+}
+function vGA_GameOverBody(){
+  const r = v.round;
+  let html = '';
+  if(r.gcard){
+    html += `<div class="label">Guard's card</div><div class="card-row">${cardHTML(r.gcard, false)}${r.poisonActive ? vExtraCardHTML(v.poison, 'Poison card') : ''}</div>`;
+    if(r.shield){
+      html += `<div style="color:var(--ink-dim); margin-bottom:6px;">Shield blocked: <b>${r.blockChoice ? r.blockChoice.toUpperCase() : '—'}</b> hit.</div>`;
+    }
+  }
+  if(r.acards.length){
+    html += `<div class="label" style="margin-top:10px;">Assassin cards (${r.acards.length}/3)</div><div class="card-row">${r.acards.map(c=>cardHTML(c, false)).join('')}</div>`;
+  }
+  if(r.bonusCard){
+    const targetSuits = vGA_TargetSuits(r), targetRanks = vGA_TargetRanks(r);
+    const critLabel = r.bonusCriterion === 'suit' ? targetSuits.map(s=>SUITS[s].sym).join('/') : targetRanks.map(RANK_LABEL).join('/');
+    html += `<div class="label" style="margin-top:10px;">Bonus card (${r.bonusCriterion} = ${critLabel})</div><div class="card-row">${cardHTML(r.bonusCard, false)}</div>`;
+  }
+  return html;
+}
+function vGA_Winner(){
+  if(v.guardHP <= 0 && v.assassinHP <= 0) return "It's a Tie";
+  if(v.guardHP <= 0) return 'Assassin Wins';
+  if(v.assassinHP <= 0) return 'Guard Wins';
+  const gPct = v.guardHP / v.guardMaxHP, aPct = v.assassinHP / v.assassinMaxHP;
+  if(gPct > aPct) return 'Guard Wins';
+  if(aPct > gPct) return 'Assassin Wins';
+  return "It's a Tie";
+}
+function renderVersusGA(){
+  const r = v.round;
+  if(v.over){
+    render(`
+      <div class="panel">
+        <div class="result-title">${vGA_Winner()}</div>
+        <br><br>
+        ${vGA_GameOverBody()}
+        <button class="action" onclick="vPlayAgain()">Play again</button>
+        ${vLogHTML()}
+      </div>
+      <button class="ghost" onclick="showModeSelect()">← Back to menu</button>
+    `);
+    return;
+  }
+  let body = '';
+  if(r.phase === 'guard'){
+    body = `<button class="action" onclick="vDrawGuard()">Player ${v.guardPlayer} (Guard): Draw card</button>`;
+  } else if(r.phase === 'shield-choice'){
+    body = `
+      <div class="shield-banner">🛡️ Player ${v.guardPlayer} (Guard) drew a Spade — shield up!</div>
+      <div class="label">Guard's card</div>
+      <div class="card-row">${cardHTML(r.gcard, true)}</div>
+      <div style="color:var(--ink-dim); margin-bottom:10px;">Player ${v.guardPlayer}: choose which hit type this shield blocks.</div>
+      <div class="row">
+        <button class="action" onclick="vSetBlock('suit')">Block Suit hit</button>
+        <button class="action" onclick="vSetBlock('rank')">Block Rank hit</button>
+      </div>
+    `;
+  } else if(r.phase === 'assassin'){
+    const targetSuits = vGA_TargetSuits(r).map(s=>SUITS[s].sym).join(' / ');
+    const targetRanks = vGA_TargetRanks(r).map(RANK_LABEL).join(' / ');
+    const poisonNote = r.poisonActive ? `<div style="color:var(--ink-dim); margin-bottom:6px;">☠️ Poison active from Assassin's last bonus card.</div>` : '';
+    body = `
+      <div class="label">Guard's card</div>
+      <div class="card-row">${cardHTML(r.gcard, false)}${r.poisonActive ? vExtraCardHTML(v.poison, 'Poison card') : ''}</div>
+      ${r.shield ? `<div style="color:var(--ink-dim); margin-bottom:6px;">Shield blocks: <b>${r.blockChoice.toUpperCase()}</b> hit.</div>` : ''}
+      ${poisonNote}
+      <div style="color:var(--ink-dim); margin-bottom:10px;">Target suit: ${targetSuits} &nbsp;|&nbsp; Target rank: ${targetRanks}</div>
+      <div class="label" style="margin-top:10px;">Assassin card (P${v.assassinPlayer}) — ${r.acards.length}/3</div>
+      <div class="card-row">${r.acards.map((c,i)=>cardHTML(c, i===r.acards.length-1)).join('')}</div>
+      <button class="action" onclick="vDrawAssassinCard()">Player ${v.assassinPlayer} (Assassin): Draw card ${r.acards.length+1}</button>
+    `;
+  } else if(r.phase === 'bonus-choice'){
+    const targetSuits = vGA_TargetSuits(r).map(s=>SUITS[s].sym).join('/');
+    const targetRanks = vGA_TargetRanks(r).map(RANK_LABEL).join('/');
+    body = `
+      <div class="label">Guard's card</div>
+      <div class="card-row">${cardHTML(r.gcard, false)}${r.poisonActive ? vExtraCardHTML(v.poison, 'Poison card') : ''}</div>
+      <div class="label" style="margin-top:10px;">Assassin cards (3/3)</div>
+      <div class="card-row">${r.acards.map(c=>cardHTML(c, false)).join('')}</div>
+      <div style="color:var(--ink-dim); margin-bottom:10px;">${r.raw_hits_3===0 ? 'No hits yet' : '1 hit so far'}, but a pairing exists — bonus draw! It's unblockable, and it also poisons Guard's next round. Player ${v.assassinPlayer}: choose the criterion.</div>
+      <div class="row">
+        <button class="action" onclick="vSetBonusCriterion('suit')">Use Suit (${targetSuits})</button>
+        <button class="action" onclick="vSetBonusCriterion('rank')">Use Rank (${targetRanks})</button>
+      </div>
+    `;
+  } else if(r.phase === 'bonus-draw'){
+    const critLabel = r.bonusCriterion === 'suit' ? vGA_TargetSuits(r).map(s=>SUITS[s].sym).join('/') : vGA_TargetRanks(r).map(RANK_LABEL).join('/');
+    body = `
+      <div class="label">Guard's card</div>
+      <div class="card-row">${cardHTML(r.gcard, false)}${r.poisonActive ? vExtraCardHTML(v.poison, 'Poison card') : ''}</div>
+      <div class="label" style="margin-top:10px;">Assassin cards (3/3)</div>
+      <div class="card-row">${r.acards.map(c=>cardHTML(c, false)).join('')}</div>
+      <div style="color:var(--ink-dim); margin-bottom:10px;">Bonus criterion chosen: <b>${r.bonusCriterion.toUpperCase()}</b>. It hits (unblockable) if it matches ${critLabel}.</div>
+      <button class="action" onclick="vDrawBonus()">Player ${v.assassinPlayer} (Assassin): Draw bonus card</button>
+    `;
+  } else if(r.phase === 'round-done'){
+    body = `
+      <div class="label">Guard's card</div>
+      <div class="card-row">${cardHTML(r.gcard, false)}${r.poisonActive ? vExtraCardHTML(v.poison, 'Poison card') : ''}</div>
+      <div class="label" style="margin-top:10px;">Assassin cards (3/3${r.bonusCard?' + bonus':''})</div>
+      <div class="card-row">${r.acards.map(c=>cardHTML(c, false)).join('')}${r.bonusCard?cardHTML(r.bonusCard, false):''}</div>
+      <div style="color:var(--ink-dim); margin:10px 0;">Round complete.</div>
+      <button class="action" onclick="vNextRound()">Next round</button>
+    `;
+  }
+  render(`
+    <div class="panel">
+      ${vRoundBanner()}
+      <br>
+      <div class="hp-board">${vHPRow('guard', v.guardPlayer, v.guardHP)}${vHPRow('assassin', v.assassinPlayer, v.assassinHP)}</div>
+      ${body}
+      ${vLogHTML()}
+    </div>
+    <button class="ghost" onclick="showModeSelect()">← Back to menu</button>
+  `);
+}
+
+// ============ GUARD vs SORCERER ============
+function vNextRoundGS(){
+  v.round = {
+    phase:'guard', gcard:null, shield:false, blockChoice:null, blockUsed:false,
+    c1:null, c2:null, c1Black:null, impactCard:null
+  };
+  renderVersus();
+}
+function vGS_CheckDeath(){
+  if(v.guardHP <= 0 || v.sorcererHP <= 0){ v.over = true; renderVersus(); return true; }
+  return false;
+}
+// checks the card's own suit/rank against Guard's card for blocking eligibility
+function vGS_CheckBlock(card){
+  const r = v.round;
+  const gsuit = r.gcard.suit, grank = r.gcard.rank;
+  let type = null;
+  if(card.suit === gsuit) type = 'suit';
+  else if(card.rank === grank) type = 'rank';
+  if(type && r.shield && !r.blockUsed && r.blockChoice === type){
+    r.blockUsed = true;
+    return true;
+  }
+  return false;
+}
+// card2 hits if it matches Guard's card OR Card 1 (suit or rank), and is not itself a spade.
+// (card2 can't ride Card 1's spade suit to hit — only Guard's suit counts for that.)
+// Returns 'suit', 'rank', or null — identifying which type of match against Guard's card occurred.
+function vGS_Card2MatchType(gsuit, grank, r1, s1, r2, s2){
+  if(s2 === 'S') return null; // card2 never hits if it's a spade, no exceptions
+  if(s2 === gsuit) return 'guard-suit';
+  if(r2 === grank) return 'guard-rank';
+  if(s1 !== 'S' && s2 === s1) return 'card1-suit'; // card2 can't ride card1's spade to hit — only Guard's
+  if(r2 === r1) return 'card1-rank';
+  return null;
+}
+function vGS_MatchLabel(matchType){
+  switch(matchType){
+    case 'guard-suit': return "Guard's suit";
+    case 'guard-rank': return "Guard's rank";
+    case 'card1-suit': return "Card 1's suit";
+    case 'card1-rank': return "Card 1's rank";
+    default: return '';
+  }
+}
+function vGSDrawGuard(){
+  const c = vDrawRaw();
+  if(!c){ vFinishNoCards(); return; }
+  const r = v.round;
+  r.gcard = c;
+  if(c.suit === 'S'){
+    r.shield = true;
+    r.phase = 'shield-choice';
+    renderVersus();
+  } else {
+    const dmg = c.rank === 1 ? 2 : 1;
+    v.sorcererHP = Math.max(0, v.sorcererHP - dmg);
+    vLogPush(`Guard (P${v.guardPlayer}) drew ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → Sorcerer takes ${dmg}. HP — Guard ${v.guardHP}, Sorcerer ${v.sorcererHP}`);
+    if(vGS_CheckDeath()) return;
+    r.phase = 'sorc-c1';
+    renderVersus();
+  }
+}
+function vGSSetBlock(choice){
+  v.round.blockChoice = choice;
+  vLogPush(`Guard (P${v.guardPlayer}) shield will block the next ${choice.toUpperCase()} hit.`);
+  v.round.phase = 'sorc-c1';
+  renderVersus();
+}
+function vGSDrawC1(){
+  const c = vDrawRaw();
+  if(!c){ vFinishNoCards(); return; }
+  const r = v.round;
+  r.c1 = c;
+  r.c1Black = (c.suit==='S' || c.suit==='C');
+  const hit1 = (c.suit !== 'S');
+  if(hit1){
+    const blocked = vGS_CheckBlock(c);
+    if(blocked){
+      vLogPush(`Sorcerer (P${v.sorcererPlayer}) card 1 ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → not a spade, hit! But the shield blocks it.`);
+    } else {
+      v.guardHP = Math.max(0, v.guardHP - 1);
+      vLogPush(`Sorcerer (P${v.sorcererPlayer}) card 1 ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → not a spade, hit! Guard takes 1. HP — Guard ${v.guardHP}, Sorcerer ${v.sorcererHP}`);
+      if(vGS_CheckDeath()) return;
+    }
+  } else {
+    vLogPush(`Sorcerer (P${v.sorcererPlayer}) card 1 ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → spade, no hit.`);
+  }
+  r.phase = 'sorc-c2';
+  renderVersus();
+}
+function vGS_DrawImpact(){
+  const r = v.round;
+  const c = vDrawRaw();
+  if(!c){ vFinishNoCards(); return null; }
+  r.impactCard = c;
+  vLogPush(`Sorcerer draws an Impact card: ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} — purely symbolic, no effect.`);
+  return c;
+}
+function vGSDrawC2(){
+  const c = vDrawRaw();
+  if(!c){ vFinishNoCards(); return; }
+  const r = v.round;
+  r.c2 = c;
+  const matchType = vGS_Card2MatchType(r.gcard.suit, r.gcard.rank, r.c1.rank, r.c1.suit, c.rank, c.suit);
+  const hit2 = matchType !== null;
+  r.card2MatchType = matchType;
+  const c1Red = !r.c1Black;
+  const c2Black = (c.suit==='S' || c.suit==='C');
+  const c2Red = !c2Black;
+
+  // card1 black + card2 black + matches -> offer the choice BEFORE any damage lands
+  if(r.c1Black && c2Black && hit2){
+    r.phase = 'sorc-choice';
+    renderVersus();
+    return;
+  }
+
+  if(hit2){
+    const blocked = vGS_CheckBlock(c);
+    if(blocked){
+      vLogPush(`Sorcerer (P${v.sorcererPlayer}) card 2 ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → matches ${vGS_MatchLabel(matchType)}! But the shield blocks it.`);
+    } else {
+      v.guardHP = Math.max(0, v.guardHP - 1);
+      vLogPush(`Sorcerer (P${v.sorcererPlayer}) card 2 ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → matches ${vGS_MatchLabel(matchType)}! Guard takes 1. HP — Guard ${v.guardHP}, Sorcerer ${v.sorcererHP}`);
+      if(vGS_CheckDeath()) return;
+    }
+  } else {
+    vLogPush(`Sorcerer (P${v.sorcererPlayer}) card 2 ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → no match.`);
+  }
+
+  if(c1Red && c2Red){
+    // ougi -> Sorcerer draws an Impact card first (exposes Guard's shield next round)
+    const impact = vGS_DrawImpact();
+    if(impact === null) return;
+    // ougi itself — unconditional hit; only the Impact card's own suit/rank can get it blocked
+    const blockedOugi = vGS_CheckBlock(impact);
+    if(blockedOugi){
+      vLogPush(`Sorcerer (P${v.sorcererPlayer}) — both cards red! Ougi triggers, but the shield blocks it (Impact ${SUITS[impact.suit].sym}${RANK_LABEL(impact.rank)}).`);
+    } else {
+      v.guardHP = Math.max(0, v.guardHP - 1);
+      vLogPush(`Sorcerer (P${v.sorcererPlayer}) — both cards red! Ougi strike lands (Impact ${SUITS[impact.suit].sym}${RANK_LABEL(impact.rank)}). Guard takes 1. HP — Guard ${v.guardHP}, Sorcerer ${v.sorcererHP}`);
+      if(vGS_CheckDeath()) return;
+    }
+    r.phase = 'round-done';
+    renderVersus();
+    return;
+  }
+
+  if(r.c1Black && c2Black){
+    // reached only when NOT matching (matching case already returned above)
+    if(vGS_DrawImpact() === null) return;
+    v.sorcererHP = Math.min(5, v.sorcererHP + 1);
+    vLogPush(`Sorcerer (P${v.sorcererPlayer}) — non-matching black card 2 heals 1. HP — Guard ${v.guardHP}, Sorcerer ${v.sorcererHP}`);
+  }
+  r.phase = 'round-done';
+  renderVersus();
+}
+function vGSChooseHitHeal(choice){
+  const r = v.round;
+  if(choice === 'heal'){
+    if(vGS_DrawImpact() === null) return;
+    v.sorcererHP = Math.min(5, v.sorcererHP + 1);
+    vLogPush(`Sorcerer (P${v.sorcererPlayer}) card 2 ${SUITS[r.c2.suit].sym}${RANK_LABEL(r.c2.rank)} → chose to heal 1. HP — Guard ${v.guardHP}, Sorcerer ${v.sorcererHP}`);
+    r.phase = 'round-done';
+    renderVersus();
+  } else {
+    const blocked = vGS_CheckBlock(r.c2);
+    if(blocked){
+      vLogPush(`Sorcerer (P${v.sorcererPlayer}) card 2 ${SUITS[r.c2.suit].sym}${RANK_LABEL(r.c2.rank)} → chose to strike, but the shield blocks it.`);
+    } else {
+      v.guardHP = Math.max(0, v.guardHP - 1);
+      vLogPush(`Sorcerer (P${v.sorcererPlayer}) card 2 ${SUITS[r.c2.suit].sym}${RANK_LABEL(r.c2.rank)} → chose to strike (matched ${vGS_MatchLabel(r.card2MatchType)})! Guard takes 1. HP — Guard ${v.guardHP}, Sorcerer ${v.sorcererHP}`);
+      if(vGS_CheckDeath()) return;
+    }
+    r.phase = 'round-done';
+    renderVersus();
+  }
+}
+function vGS_GameOverBody(){
+  const r = v.round;
+  let html = '';
+  if(r.gcard){
+    html += `<div class="label">Guard's card</div><div class="card-row">${cardHTML(r.gcard, false)}</div>`;
+    if(r.shield){
+      html += `<div style="color:var(--ink-dim); margin-bottom:6px;">Shield blocked: <b>${r.blockChoice ? r.blockChoice.toUpperCase() : '—'}</b> hit.</div>`;
+    }
+  }
+  const scards = [r.c1, r.c2].filter(Boolean);
+  if(scards.length){
+    const impact = r.impactCard ? vExtraCardHTML(r.impactCard, 'Impact card') : '';
+    html += `<div class="label" style="margin-top:10px;">Sorcerer cards (${scards.length}/2)</div><div class="card-row">${scards.map(c=>cardHTML(c,false)).join('')}${impact}</div>`;
+  }
+  return html;
+}
+function vGS_Winner(){
+  if(v.guardHP <= 0 && v.sorcererHP <= 0) return "It's a Tie";
+  if(v.guardHP <= 0) return 'Sorcerer Wins';
+  if(v.sorcererHP <= 0) return 'Guard Wins';
+  const gPct = v.guardHP / v.guardMaxHP, sPct = v.sorcererHP / v.sorcererMaxHP;
+  if(gPct > sPct) return 'Guard Wins';
+  if(sPct > gPct) return 'Sorcerer Wins';
+  return "It's a Tie";
+}
+function renderVersusGS(){
+  const r = v.round;
+  if(v.over){
+    render(`
+      <div class="panel">
+        <div class="result-title">${vGS_Winner()}</div>
+        <br><br>
+        ${vGS_GameOverBody()}
+        <button class="action" onclick="vPlayAgain()">Play again</button>
+        ${vLogHTML()}
+      </div>
+      <button class="ghost" onclick="showModeSelect()">← Back to menu</button>
+    `);
+    return;
+  }
+  let body = '';
+  if(r.phase === 'guard'){
+    body = `<button class="action" onclick="vGSDrawGuard()">Player ${v.guardPlayer} (Guard): Draw card</button>`;
+  } else if(r.phase === 'shield-choice'){
+    body = `
+      <div class="shield-banner">🛡️ Player ${v.guardPlayer} (Guard) drew a Spade — shield up!</div>
+      <div class="label">Guard's card</div>
+      <div class="card-row">${cardHTML(r.gcard, true)}</div>
+      <div style="color:var(--ink-dim); margin-bottom:10px;">Player ${v.guardPlayer}: choose which hit type this shield blocks.</div>
+      <div class="row">
+        <button class="action" onclick="vGSSetBlock('suit')">Block Suit hit</button>
+        <button class="action" onclick="vGSSetBlock('rank')">Block Rank hit</button>
+      </div>
+    `;
+  } else if(r.phase === 'sorc-c1'){
+    body = `
+      <div class="label">Guard's card</div>
+      <div class="card-row">${cardHTML(r.gcard, false)}</div>
+      ${r.shield ? `<div style="color:var(--ink-dim); margin-bottom:6px;">Shield blocks: <b>${r.blockChoice.toUpperCase()}</b> hit (only if the striking card also shares that suit/rank with Guard's card).</div>` : ''}
+      <div style="color:var(--ink-dim); margin-bottom:10px;">Sorcerer's card 1 hits automatically unless it's a Spade.</div>
+      <button class="action" onclick="vGSDrawC1()">Player ${v.sorcererPlayer} (Sorcerer): Draw card 1</button>
+    `;
+  } else if(r.phase === 'sorc-c2'){
+    body = `
+      <div class="label">Guard's card</div>
+      <div class="card-row">${cardHTML(r.gcard, false)}</div>
+      ${r.shield ? `<div style="color:var(--ink-dim); margin-bottom:6px;">Shield blocks: <b>${r.blockChoice.toUpperCase()}</b> hit.</div>` : ''}
+      <div class="label" style="margin-top:10px;">Sorcerer card 1</div>
+      <div class="card-row">${cardHTML(r.c1, false)}</div>
+      <div style="color:var(--ink-dim); margin-bottom:10px;">Card 2 hits only by matching Guard's card's suit or rank.</div>
+      <button class="action" onclick="vGSDrawC2()">Player ${v.sorcererPlayer} (Sorcerer): Draw card 2</button>
+    `;
+  } else if(r.phase === 'sorc-choice'){
+    body = `
+      <div class="label">Guard's card</div>
+      <div class="card-row">${cardHTML(r.gcard, false)}</div>
+      <div class="label" style="margin-top:10px;">Sorcerer cards</div>
+      <div class="card-row">${cardHTML(r.c1,false)}${cardHTML(r.c2,false)}</div>
+      <div style="color:var(--ink-dim); margin-bottom:10px;">Card 2 matches ${vGS_MatchLabel(r.card2MatchType)}! Player ${v.sorcererPlayer}: strike for damage, or heal 1 HP instead?</div>
+      <div class="row">
+        <button class="action" onclick="vGSChooseHitHeal('hit')">Strike (blockable)</button>
+        <button class="action" onclick="vGSChooseHitHeal('heal')">Heal 1 HP</button>
+      </div>
+    `;
+  } else if(r.phase === 'round-done'){
+    const scards = [r.c1, r.c2].filter(Boolean);
+    const impact = r.impactCard ? vExtraCardHTML(r.impactCard, 'Impact card') : '';
+    body = `
+      <div class="label">Guard's card</div>
+      <div class="card-row">${cardHTML(r.gcard, false)}</div>
+      <div class="label" style="margin-top:10px;">Sorcerer cards (${scards.length}/2)</div>
+      <div class="card-row">${scards.map(c=>cardHTML(c,false)).join('')}${impact}</div>
+      <div style="color:var(--ink-dim); margin:10px 0;">Round complete.</div>
+      <button class="action" onclick="vNextRound()">Next round</button>
+    `;
+  }
+  render(`
+    <div class="panel">
+      ${vRoundBanner()}
+      <br>
+      <div class="hp-board">${vHPRow('guard', v.guardPlayer, v.guardHP)}${vHPRow('sorcerer', v.sorcererPlayer, v.sorcererHP)}</div>
+      ${body}
+      ${vLogHTML()}
+    </div>
+    <button class="ghost" onclick="showModeSelect()">← Back to menu</button>
+  `);
+}
+
+// ============ ASSASSIN vs SORCERER ============
+function vNextRoundAS(){
+  // expire poison once its 1-round window has passed
+  if(v.poison !== null && v.roundNum - v.poison.createdRound > 1) v.poison = null;
+  const poisonActive = v.poison !== null && (v.roundNum - v.poison.createdRound === 1);
+  v.round = {
+    phase:'sorc-c1', c1:null, c2:null, c1Black:null, extraCard:null,
+    acards:[], hitCount:0, sSuits:null, sRanks:null, rawHits:0, pairing:false,
+    bonusCard:null, bonusCriterion:null, poisonActive, poisonHeld:false, heldDamage:0
+  };
+  renderVersus();
+}
+// current target suits/ranks for this round: Sorcerer's cards, plus poison's suit/rank
+// while poison is still active (unused) — recomputed live so a used-up poison drops out immediately
+function vAS_TargetSuits(r){
+  const suits = new Set(r.sSuits);
+  if(r.poisonActive && v.poison) suits.add(v.poison.suit);
+  return suits;
+}
+function vAS_TargetRanks(r){
+  const ranks = new Set(r.sRanks);
+  if(r.poisonActive && v.poison) ranks.add(v.poison.rank);
+  return ranks;
+}
+function vAS_CheckDeath(){
+  if(v.assassinHP <= 0 || v.sorcererHP <= 0){ v.over = true; renderVersus(); return true; }
+  return false;
+}
+function vAS_Card2Hits(r1,s1,r2,s2){
+  if(s1 !== 'S'){
+    return (s2 !== 'S') && (s2 === s1 || r2 === r1);
+  } else {
+    return (s2 !== 'S') && (r2 === r1);
+  }
+}
+function vASDrawC1(){
+  const c = vDrawRaw();
+  if(!c){ vFinishNoCards(); return; }
+  const r = v.round;
+  r.c1 = c;
+  r.c1Black = (c.suit==='S' || c.suit==='C');
+  const wouldHit = c.suit !== 'S';
+  if(wouldHit){
+    if(r.poisonActive && c.rank < v.poison.rank){
+      vLogPush(`Sorcerer (P${v.sorcererPlayer}) card 1 ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → not a spade, hit! But poison from ${SUITS[v.poison.suit].sym}${RANK_LABEL(v.poison.rank)} holds it back (rank ${c.rank} < ${v.poison.rank}), pending Assassin's turn.`);
+      r.poisonHeld = true;
+      r.heldDamage += 1;
+    } else {
+      v.assassinHP = Math.max(0, v.assassinHP - 1);
+      vLogPush(`Sorcerer (P${v.sorcererPlayer}) card 1 ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → not a spade, hit! Assassin takes 1. HP — Assassin ${v.assassinHP}, Sorcerer ${v.sorcererHP}`);
+      if(vAS_CheckDeath()) return;
+    }
+  } else {
+    vLogPush(`Sorcerer (P${v.sorcererPlayer}) card 1 ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → spade, no hit.`);
+  }
+  r.phase = 'sorc-c2';
+  renderVersus();
+}
+function vASDrawC2(){
+  const c = vDrawRaw();
+  if(!c){ vFinishNoCards(); return; }
+  const r = v.round;
+  r.c2 = c;
+  const r1 = r.c1.rank, s1 = r.c1.suit, r2 = c.rank, s2 = c.suit;
+  const c2Black = (s2==='S' || s2==='C');
+  const c1Red = !r.c1Black;
+  const c2Red = !c2Black;
+
+  const hit2 = vAS_Card2Hits(r1,s1,r2,s2);
+
+  // card1 black + card2 black + matches -> offer the choice BEFORE any damage lands
+  if(r.c1Black && c2Black && hit2){
+    r.phase = 'sorc-choice';
+    renderVersus();
+    return;
+  }
+
+  if(hit2){
+    if(r.poisonActive && r2 < v.poison.rank){
+      vLogPush(`Sorcerer (P${v.sorcererPlayer}) card 2 ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → matches card 1, but poison from ${SUITS[v.poison.suit].sym}${RANK_LABEL(v.poison.rank)} holds it back (rank ${r2} < ${v.poison.rank}), pending Assassin's turn.`);
+      r.poisonHeld = true;
+      r.heldDamage += 1;
+    } else {
+      v.assassinHP = Math.max(0, v.assassinHP - 1);
+      vLogPush(`Sorcerer (P${v.sorcererPlayer}) card 2 ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → matches card 1! Assassin takes 1. HP — Assassin ${v.assassinHP}, Sorcerer ${v.sorcererHP}`);
+      if(vAS_CheckDeath()) return;
+    }
+  } else {
+    vLogPush(`Sorcerer (P${v.sorcererPlayer}) card 2 ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → no match.`);
+  }
+
+  if(c1Red && c2Red){
+    // ougi -> the Impact card itself is now subject to poison's individual check too
+    r.extraCard = vDrawRaw();
+    if(!r.extraCard){ vFinishNoCards(); return; }
+    if(r.poisonActive && r.extraCard.rank < v.poison.rank){
+      vLogPush(`Sorcerer (P${v.sorcererPlayer}) — both cards red! Ougi triggers, but poison from ${SUITS[v.poison.suit].sym}${RANK_LABEL(v.poison.rank)} holds it back (Impact ${SUITS[r.extraCard.suit].sym}${RANK_LABEL(r.extraCard.rank)}, rank ${r.extraCard.rank} < ${v.poison.rank}), pending Assassin's turn.`);
+      r.poisonHeld = true;
+      r.heldDamage += 1;
+    } else {
+      v.assassinHP = Math.max(0, v.assassinHP - 1);
+      vLogPush(`Sorcerer (P${v.sorcererPlayer}) — both cards red! Guaranteed ougi strike lands (Impact ${SUITS[r.extraCard.suit].sym}${RANK_LABEL(r.extraCard.rank)}). Assassin takes 1. HP — Assassin ${v.assassinHP}, Sorcerer ${v.sorcererHP}`);
+      if(vAS_CheckDeath()) return;
+    }
+    vAS_ProceedAfterSorcerer();
+    return;
+  }
+
+  if(r.c1Black && c2Black){
+    // reached only when NOT matching (the matching case already returned above) -> automatic heal
+    r.extraCard = vDrawRaw();
+    if(!r.extraCard){ vFinishNoCards(); return; }
+    v.sorcererHP = Math.min(5, v.sorcererHP + 1);
+    vLogPush(`Sorcerer (P${v.sorcererPlayer}) — non-matching black card 2 heals 1. Drew ${SUITS[r.extraCard.suit].sym}${RANK_LABEL(r.extraCard.rank)} as a symbolic extra target. HP — Assassin ${v.assassinHP}, Sorcerer ${v.sorcererHP}`);
+  }
+  vAS_ProceedAfterSorcerer();
+}
+function vASChooseHitHeal(choice){
+  const r = v.round;
+  if(choice === 'heal'){
+    r.extraCard = vDrawRaw();
+    if(!r.extraCard){ vFinishNoCards(); return; }
+    v.sorcererHP = Math.min(5, v.sorcererHP + 1);
+    vLogPush(`Sorcerer (P${v.sorcererPlayer}) card 2 ${SUITS[r.c2.suit].sym}${RANK_LABEL(r.c2.rank)} → chose to heal 1. Drew ${SUITS[r.extraCard.suit].sym}${RANK_LABEL(r.extraCard.rank)} as a symbolic extra target. HP — Assassin ${v.assassinHP}, Sorcerer ${v.sorcererHP}`);
+    vAS_ProceedAfterSorcerer();
+  } else {
+    if(r.poisonActive && r.c2.rank < v.poison.rank){
+      vLogPush(`Sorcerer (P${v.sorcererPlayer}) card 2 ${SUITS[r.c2.suit].sym}${RANK_LABEL(r.c2.rank)} → chose to strike, but poison from ${SUITS[v.poison.suit].sym}${RANK_LABEL(v.poison.rank)} holds it back (rank ${r.c2.rank} < ${v.poison.rank}), pending Assassin's turn.`);
+      r.poisonHeld = true;
+      r.heldDamage += 1;
+    } else {
+      v.assassinHP = Math.max(0, v.assassinHP - 1);
+      vLogPush(`Sorcerer (P${v.sorcererPlayer}) card 2 ${SUITS[r.c2.suit].sym}${RANK_LABEL(r.c2.rank)} → chose to strike! Assassin takes 1. HP — Assassin ${v.assassinHP}, Sorcerer ${v.sorcererHP}`);
+      if(vAS_CheckDeath()) return;
+    }
+    vAS_ProceedAfterSorcerer();
+  }
+}
+function vAS_ProceedAfterSorcerer(){
+  const r = v.round;
+  r.sSuits = new Set([r.c1.suit, r.c2.suit]);
+  r.sRanks = new Set([r.c1.rank, r.c2.rank]);
+  if(r.extraCard){
+    r.sSuits.add(r.extraCard.suit);
+    r.sRanks.add(r.extraCard.rank);
+  }
+  r.phase = 'assassin';
+  renderVersus();
+}
+function vASDrawAssassinCard(){
+  const c = vDrawRaw();
+  if(!c){ vFinishNoCards(); return; }
+  const r = v.round;
+  const isFirstCard = r.acards.length === 0;
+  r.acards.push(c);
+  const targetSuits = vAS_TargetSuits(r);
+  const targetRanks = vAS_TargetRanks(r);
+  const isHit = targetSuits.has(c.suit) || targetRanks.has(c.rank);
+  if(isHit){
+    if(r.poisonActive && v.poison !== null && (c.suit === v.poison.suit || c.rank === v.poison.rank)){
+      vLogPush(`Poison from ${SUITS[v.poison.suit].sym}${RANK_LABEL(v.poison.rank)} is used up and removed from the target range.`);
+      v.poison = null;
+      r.poisonActive = false;
+    }
+    r.hitCount += 1;
+    v.sorcererHP = Math.max(0, v.sorcererHP - 1);
+    vLogPush(`Assassin (P${v.assassinPlayer}) drew ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → matches! Sorcerer takes 1. HP — Assassin ${v.assassinHP}, Sorcerer ${v.sorcererHP}`);
+    if(vAS_CheckDeath()) return;
+  } else {
+    vLogPush(`Assassin (P${v.assassinPlayer}) drew ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} → no match.`);
+  }
+
+  // poison that held back a hit this round dissolves right after Assassin's first card, regardless of outcome
+  if(isFirstCard && r.poisonHeld && r.poisonActive){
+    vLogPush(`Poison from ${SUITS[v.poison.suit].sym}${RANK_LABEL(v.poison.rank)} dissolves after holding back a hit — removed from the target range.`);
+    v.poison = null;
+    r.poisonActive = false;
+  }
+
+  if(r.acards.length === 3){
+    r.rawHits = r.hitCount;
+    // Assassin's turn is over — the poison-held damage registers regardless of what else landed this turn
+    if(r.heldDamage > 0){
+      v.assassinHP = Math.max(0, v.assassinHP - r.heldDamage);
+      vLogPush(`Assassin's turn ends — the poison-held damage lands! Assassin takes ${r.heldDamage}. HP — Assassin ${v.assassinHP}, Sorcerer ${v.sorcererHP}`);
+      r.heldDamage = 0;
+      if(vAS_CheckDeath()) return;
+    }
+    r.pairing = pairingExists(r.acards);
+    if((r.rawHits === 0 || r.rawHits === 1) && r.pairing){
+      r.phase = 'bonus-choice';
+    } else {
+      r.phase = 'round-done';
+    }
+  }
+  renderVersus();
+}
+function vASSetBonusCriterion(choice){
+  v.round.bonusCriterion = choice;
+  vLogPush(`Assassin (P${v.assassinPlayer}) bonus criterion: ${choice.toUpperCase()}.`);
+  v.round.phase = 'bonus-draw';
+  renderVersus();
+}
+function vASDrawBonus(){
+  const c = vDrawRaw();
+  if(!c){ vFinishNoCards(); return; }
+  const r = v.round;
+  r.bonusCard = c;
+  const targetSuits = vAS_TargetSuits(r);
+  const targetRanks = vAS_TargetRanks(r);
+  const hit = r.bonusCriterion === 'suit' ? targetSuits.has(c.suit) : targetRanks.has(c.rank);
+  if(hit){
+    v.sorcererHP = Math.max(0, v.sorcererHP - 1);
+    vLogPush(`Assassin (P${v.assassinPlayer}) bonus ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} (${r.bonusCriterion}) → matched, unblockable! Sorcerer takes 1. HP — Assassin ${v.assassinHP}, Sorcerer ${v.sorcererHP}`);
+    if(vAS_CheckDeath()) return;
+  } else {
+    vLogPush(`Assassin (P${v.assassinPlayer}) bonus ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} (${r.bonusCriterion}) → missed.`);
+  }
+  v.poison = {suit: c.suit, rank: c.rank, createdRound: v.roundNum};
+  vLogPush(`Assassin's bonus card ${SUITS[c.suit].sym}${RANK_LABEL(c.rank)} poisons Sorcerer's next round.`);
+  r.phase = 'round-done';
+  renderVersus();
+}
+function vAS_GameOverBody(){
+  const r = v.round;
+  let html = '';
+  const scards = [r.c1, r.c2].filter(Boolean);
+  if(scards.length){
+    let extra = '';
+    if(r.extraCard) extra += vExtraCardHTML(r.extraCard, 'Impact card');
+    if(r.poisonActive) extra += vExtraCardHTML(v.poison, 'Poison card');
+    html += `<div class="label">Sorcerer cards (${scards.length}/2)</div><div class="card-row">${scards.map(c=>cardHTML(c,false)).join('')}${extra}</div>`;
+  }
+  if(r.acards && r.acards.length){
+    html += `<div class="label" style="margin-top:10px;">Assassin cards (${r.acards.length}/3)</div><div class="card-row">${r.acards.map(c=>cardHTML(c,false)).join('')}</div>`;
+  }
+  if(r.bonusCard){
+    html += `<div class="label" style="margin-top:10px;">Bonus card (${r.bonusCriterion})</div><div class="card-row">${cardHTML(r.bonusCard,false)}</div>`;
+  }
+  return html;
+}
+function vAS_Winner(){
+  if(v.assassinHP <= 0 && v.sorcererHP <= 0) return "It's a Tie";
+  if(v.assassinHP <= 0) return 'Sorcerer Wins';
+  if(v.sorcererHP <= 0) return 'Assassin Wins';
+  if(v.assassinHP > v.sorcererHP) return 'Assassin Wins';
+  if(v.sorcererHP > v.assassinHP) return 'Sorcerer Wins';
+  return "It's a Tie";
+}
+function renderVersusAS(){
+  const r = v.round;
+  function sorcererCardsHTML(){
+    let html = `${cardHTML(r.c1,false)}${cardHTML(r.c2,false)}`;
+    if(r.extraCard) html += vExtraCardHTML(r.extraCard, 'Impact card');
+    if(r.poisonActive) html += vExtraCardHTML(v.poison, 'Poison card');
+    return html;
+  }
+  if(v.over){
+    render(`
+      <div class="panel">
+        <div class="result-title">${vAS_Winner()}</div>
+        <br><br>
+        ${vAS_GameOverBody()}
+        <button class="action" onclick="vPlayAgain()">Play again</button>
+        ${vLogHTML()}
+      </div>
+      <button class="ghost" onclick="showModeSelect()">← Back to menu</button>
+    `);
+    return;
+  }
+  let body = '';
+  if(r.phase === 'sorc-c1'){
+    body = `<button class="action" onclick="vASDrawC1()">Player ${v.sorcererPlayer} (Sorcerer): Draw card 1</button>`;
+  } else if(r.phase === 'sorc-c2'){
+    body = `
+      <div class="label">Sorcerer card 1</div>
+      <div class="card-row">${cardHTML(r.c1, false)}</div>
+      <button class="action" onclick="vASDrawC2()">Player ${v.sorcererPlayer} (Sorcerer): Draw card 2</button>
+    `;
+  } else if(r.phase === 'sorc-choice'){
+    body = `
+      <div class="label">Sorcerer cards</div>
+      <div class="card-row">${cardHTML(r.c1,false)}${cardHTML(r.c2,false)}</div>
+      <div style="color:var(--ink-dim); margin-bottom:10px;">Card 2 matches card 1! Player ${v.sorcererPlayer}: strike for damage, or heal 1 HP instead?</div>
+      <div class="row">
+        <button class="action" onclick="vASChooseHitHeal('hit')">Strike</button>
+        <button class="action" onclick="vASChooseHitHeal('heal')">Heal 1 HP</button>
+      </div>
+    `;
+  } else if(r.phase === 'assassin'){
+    const suitList = Array.from(vAS_TargetSuits(r)).map(s=>SUITS[s].sym).join(', ');
+    const rankList = Array.from(vAS_TargetRanks(r)).map(RANK_LABEL).join(', ');
+    body = `
+      <div class="label">Sorcerer cards</div>
+      <div class="card-row">${sorcererCardsHTML()}</div>
+      <div style="color:var(--ink-dim); margin-bottom:10px;">Assassin hits on suit (${suitList}) or rank (${rankList}).</div>
+      <div class="label">Assassin card (P${v.assassinPlayer}) — ${r.acards.length}/3</div>
+      <div class="card-row">${r.acards.map((c,i)=>cardHTML(c, i===r.acards.length-1)).join('')}</div>
+      <button class="action" onclick="vASDrawAssassinCard()">Player ${v.assassinPlayer} (Assassin): Draw card ${r.acards.length+1}</button>
+    `;
+  } else if(r.phase === 'bonus-choice'){
+    body = `
+      <div class="label">Sorcerer cards</div>
+      <div class="card-row">${sorcererCardsHTML()}</div>
+      <div class="label" style="margin-top:10px;">Assassin cards (3/3)</div>
+      <div class="card-row">${r.acards.map(c=>cardHTML(c,false)).join('')}</div>
+      <div style="color:var(--ink-dim); margin-bottom:10px;">${r.rawHits===0 ? 'No hits yet' : '1 hit so far'}, but a pairing exists — bonus draw! It's unblockable, and it also poisons Sorcerer's next round. Player ${v.assassinPlayer}: choose the criterion.</div>
+      <div class="row">
+        <button class="action" onclick="vASSetBonusCriterion('suit')">Use Suit</button>
+        <button class="action" onclick="vASSetBonusCriterion('rank')">Use Rank</button>
+      </div>
+    `;
+  } else if(r.phase === 'bonus-draw'){
+    body = `
+      <div class="label">Sorcerer cards</div>
+      <div class="card-row">${sorcererCardsHTML()}</div>
+      <div class="label" style="margin-top:10px;">Assassin cards (3/3)</div>
+      <div class="card-row">${r.acards.map(c=>cardHTML(c,false)).join('')}</div>
+      <div style="color:var(--ink-dim); margin-bottom:10px;">Bonus criterion chosen: <b>${r.bonusCriterion.toUpperCase()}</b>.</div>
+      <button class="action" onclick="vASDrawBonus()">Player ${v.assassinPlayer} (Assassin): Draw bonus card</button>
+    `;
+  } else if(r.phase === 'round-done'){
+    body = `
+      <div class="label">Sorcerer cards</div>
+      <div class="card-row">${sorcererCardsHTML()}</div>
+      <div class="label" style="margin-top:10px;">Assassin cards (3/3${r.bonusCard?' + bonus':''})</div>
+      <div class="card-row">${r.acards.map(c=>cardHTML(c,false)).join('')}${r.bonusCard?cardHTML(r.bonusCard,false):''}</div>
+      <div style="color:var(--ink-dim); margin:10px 0;">Round complete.</div>
+      <button class="action" onclick="vNextRound()">Next round</button>
+    `;
+  }
+  render(`
+    <div class="panel">
+      ${vRoundBanner()}
+      <br>
+      <div class="hp-board">${vHPRow('assassin', v.assassinPlayer, v.assassinHP)}${vHPRow('sorcerer', v.sorcererPlayer, v.sorcererHP)}</div>
+      ${body}
+      ${vLogHTML()}
+    </div>
+    <button class="ghost" onclick="showModeSelect()">← Back to menu</button>
+  `);
+}
+
+showModeSelect();
+</script>
+</body>
+</html>
